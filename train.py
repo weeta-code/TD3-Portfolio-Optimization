@@ -82,9 +82,13 @@ def train_agent(env, agent, n_episodes=100, max_steps=1500, eval_freq=10):
                 print(f"Received reward: {reward:.4f}")
                 
                 # Store transition in replay buffer
+<<<<<<< HEAD
                 agent.replay_buffer.add(state, action, reward, next_state, done)
                 
                 # Train agent
+=======
+                agent.replay_buffer.add(state, action, reward, next_state, done)             # Train agent
+>>>>>>> 6e48420 (Initial commit)
                 if len(agent.replay_buffer.state) > 1000:
                     print("Training on batch...", end='\r')
                     agent.train(batch_size=100)

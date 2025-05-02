@@ -10,10 +10,17 @@ class TD3Agent:
                  actor_lr=1e-3, critic_lr=1e-3,  # model learning rates
                  gamma=0.99, tau=0.005, policy_noise=0.1, noise_clip=0.25,
                  buffer_size=int(1e5), policy_delay=2):
+<<<<<<< HEAD
         
         print("TD3Agent: Starting initialization...")
         
         # Initialize networks
+=======
+
+        print("TD3Agent: Starting initialization...")
+
+       # Initialize networks
+>>>>>>> 6e48420 (Initial commit)
         print("TD3Agent: Setting up actor networks...")
         self.actor = actor
         print("TD3Agent: Creating actor target network...")
@@ -43,13 +50,21 @@ class TD3Agent:
         print(f"TD3Agent: Actor has {len(actor_params)} parameter groups")
         self.actor_optimizer = optim.SGD(actor_params, lr=actor_lr)
         print("TD3Agent: Actor optimizer created")
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 6e48420 (Initial commit)
         print("TD3Agent: Getting first critic parameters...")
         critic1_params = list(self.critic_1.parameters())
         print(f"TD3Agent: First critic has {len(critic1_params)} parameter groups")
         self.critic_optimizer_1 = optim.SGD(critic1_params, lr=critic_lr)
         print("TD3Agent: First critic optimizer created")
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 6e48420 (Initial commit)
         print("TD3Agent: Getting second critic parameters...")
         critic2_params = list(self.critic_2.parameters())
         print(f"TD3Agent: Second critic has {len(critic2_params)} parameter groups")
@@ -69,15 +84,26 @@ class TD3Agent:
         self.noise_clip = noise_clip
         self.policy_delay = policy_delay
         self.total_it = 0
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 6e48420 (Initial commit)
         print("TD3Agent: Initialization complete!")
 
     def select_action(self, state, add_noise=False):
         state = torch.FloatTensor(state.reshape(1, -1))
+<<<<<<< HEAD
         action = self.actor(state).cpu().data.numpy().flatten()          
         if add_noise:
             noise = np.random.normal(0, self.policy_noise, size=action.shape)
             action = (action + noise).clip(0, 1)  
+=======
+        action = self.actor(state).cpu().data.numpy().flatten()
+        if add_noise:
+            noise = np.random.normal(0, self.policy_noise, size=action.shape)
+            action = (action + noise).clip(0, 1)
+>>>>>>> 6e48420 (Initial commit)
         return action
 
     def train(self, batch_size=1000):
@@ -92,7 +118,11 @@ class TD3Agent:
         noise = torch.randn_like(action) * self.policy_noise
         noise = noise.clamp(-self.noise_clip, self.noise_clip)
         next_action = (self.actor_target(next_state) + noise).clamp(-self.max_action, self.max_action)
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 6e48420 (Initial commit)
         # Compute target Q-values
         target_Q1 = self.critic_target_1(next_state, next_action)
         target_Q2 = self.critic_target_2(next_state, next_action)
@@ -181,7 +211,11 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     def __init__(self, state_dim, action_dim):
         super(Critic, self).__init__()
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 6e48420 (Initial commit)
         self.l1 = nn.Linear(state_dim + action_dim, 64)
         self.l2 = nn.Linear(64, 128)
         self.l3 = nn.Linear(128, 1)
