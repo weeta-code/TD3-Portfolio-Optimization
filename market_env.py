@@ -18,11 +18,11 @@ class MarketEnv(gym.Env):
         self.starting_cash = 50000 # Example/Placeholder
         self.transaction_cost = transaction_cost
         self.risk_free_rate = risk_free_rate
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 6e48420 (Initial commit)
+
+
+
+
         # Define action and observation spaces
         self.action_space = spaces.Box(
             low=0, high=1, shape=(self.n_stocks,), dtype=np.float32
@@ -30,11 +30,9 @@ class MarketEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(self.n_stocks,), dtype=np.float32
         )
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 6e48420 (Initial commit)
+
+
         self.reset()
     # Restarts our environment to the beginning state/Re-initializes our port.
     def reset(self):
@@ -44,13 +42,13 @@ class MarketEnv(gym.Env):
         self.portfolio_returns_history = []
         self.previous_weights = self.portfolio_weights.copy()
         return self._get_observation()
-<<<<<<< HEAD
+
 
     def _calculate_technical_indicators(self, prices):
         # to calculate simple moving averages
         sma_20 = np.mean(prices[-20:], axis=0) if len(prices) >= 20 else np.mean(prices, axis=0)
         sma_50 = np.mean(prices[-50:], axis=0) if len(prices) >= 50 else np.mean(prices, axis=0)
-        
+
         # to calculate a simplified relative strength index
         returns = np.diff(prices, axis=0) if len(prices) > 1 else np.zeros_like(prices[0])
         up_moves = np.where(returns > 0, returns, 0)
@@ -58,15 +56,15 @@ class MarketEnv(gym.Env):
         avg_up = np.mean(up_moves[-14:], axis=0) if len(up_moves) >= 14 else np.mean(up_moves, axis=0)
         avg_down = np.mean(down_moves[-14:], axis=0) if len(down_moves) >= 14 else np.mean(down_moves, axis=0)
         rsi = 100 - (100 / (1 + avg_up / (avg_down + 1e-6)))
-        
+
         # to ensure all arrays have the same shape
         sma_20 = np.atleast_1d(sma_20)
         sma_50 = np.atleast_1d(sma_50)
         rsi = np.atleast_1d(rsi)
-        
+
         return np.concatenate([sma_20, sma_50, rsi])
-=======
- # Kind obsolete in this case as we aren't really seeing this being used anywhere so just commenting out for now!
+
+
 
     def _calculate_technical_indicators(self, prices):
          # to calculate simple moving averages
@@ -87,7 +85,7 @@ class MarketEnv(gym.Env):
          rsi = np.atleast_1d(rsi)
 
          return np.concatenate([sma_20, sma_50, rsi])
->>>>>>> 6e48420 (Initial commit)
+
 
     def _calculate_reward(self, portfolio_return, new_weights):
         lambd = 4.0
@@ -103,26 +101,7 @@ class MarketEnv(gym.Env):
         return normed.astype(np.float32)
 
     def step(self, action):
-<<<<<<< HEAD
-        action = self._sanitize_action(action)   
-        if self.current_step + 1 >= len(self.stock_data):
-            self.done = True
-            return self._get_observation(), self.reward, self.done, {}
- 
-        self.daily_returns = (self.stock_data[self.current_step + 1] - self.stock_data[self.current_step]) / self.stock_data[self.current_step]
-        self.portfolio_return = np.dot(action, self.daily_returns) # weighted sum of individual returns
-        self.portfolio_value *= (1 + self.portfolio_return) # cash grows or shrinks based on today's market move
-        
-        # to calculate enhanced reward
-        self.reward = self._calculate_reward(self.portfolio_return, action)
-        
-        self.portfolio_returns_history.append(self.portfolio_return) # placeholder for maybe calculating volatility eventually 
-        self.previous_weights = action.copy()
-        
-        self.current_step += 1
-        self.done = False
-        
-=======
+
         action = self._sanitize_action(action)
         if self.current_step + 1 >= len(self.stock_data):
             self.done = True
@@ -141,7 +120,26 @@ class MarketEnv(gym.Env):
         self.current_step += 1
         self.done = False
 
->>>>>>> 6e48420 (Initial commit)
+
+        action = self._sanitize_action(action)
+        if self.current_step + 1 >= len(self.stock_data):
+            self.done = True
+            return self._get_observation(), self.reward, self.done, {}
+
+        self.daily_returns = (self.stock_data[self.current_step + 1] - self.stock_data[self.current_step]) / self.stock_data[self.current_step]
+        self.portfolio_return = np.dot(action, self.daily_returns) # weighted sum of individual returns
+        self.portfolio_value *= (1 + self.portfolio_return) # cash grows or shrinks based on today's market move
+
+        # to calculate enhanced reward
+        self.reward = self._calculate_reward(self.portfolio_return, action)
+
+        self.portfolio_returns_history.append(self.portfolio_return) # placeholder for maybe calculating volatility eventually
+        self.previous_weights = action.copy()
+
+        self.current_step += 1
+        self.done = False
+
+
         return self._get_observation(), self.reward, self.done, {}
 
     def render(self):
@@ -152,11 +150,11 @@ class MarketEnv(gym.Env):
         plt.xlabel("Days")
         plt.ylabel("Portfolio Value ($)")
         plt.grid(True)
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 6e48420 (Initial commit)
+
+
+
+
         plt.subplot(1, 2, 2)
         plt.bar(range(self.n_stocks), self.portfolio_weights)
         plt.title("Current Portfolio Weights")
@@ -167,35 +165,33 @@ class MarketEnv(gym.Env):
         plt.show()
 
     def seed(self, seed_value):
-<<<<<<< HEAD
-        np.random.seed(seed_value) 
-=======
+
         np.random.seed(seed_value)
->>>>>>> 6e48420 (Initial commit)
+
+        np.random.seed(seed_value)
+
 
     def _get_state(self):
         # to get current prices
         current_prices = self.stock_data[self.current_step]
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 6e48420 (Initial commit)
+
+
         # to get historical prices for technical indicators
         lookback = 50
         start_idx = max(0, self.current_step - lookback)
         historical_prices = self.stock_data[start_idx:self.current_step + 1]
-<<<<<<< HEAD
-        
-        # to calculate these technical indicators
-        tech_indicators = self._calculate_technical_indicators(historical_prices)
-        
-=======
+
 
         # to calculate these technical indicators
         tech_indicators = self._calculate_technical_indicators(historical_prices)
 
->>>>>>> 6e48420 (Initial commit)
+
+
+        # to calculate these technical indicators
+        tech_indicators = self._calculate_technical_indicators(historical_prices)
+
+
         return (current_prices, tech_indicators)
 
     def _get_observation(self):
