@@ -66,27 +66,6 @@ class MarketEnv(gym.Env):
 
 
 
-    def _calculate_technical_indicators(self, prices):
-         # to calculate simple moving averages
-         sma_20 = np.mean(prices[-20:], axis=0) if len(prices) >= 20 else np.mean(prices, axis=0)
-         sma_50 = np.mean(prices[-50:], axis=0) if len(prices) >= 50 else np.mean(prices, axis=0)
-
-         # to calculate a simplified relative strength index
-         returns = np.diff(prices, axis=0) if len(prices) > 1 else np.zeros_like(prices[0])
-         up_moves = np.where(returns > 0, returns, 0)
-         down_moves = np.where(returns < 0, -returns, 0)
-         avg_up = np.mean(up_moves[-14:], axis=0) if len(up_moves) >= 14 else np.mean(up_moves, axis=0)
-         avg_down = np.mean(down_moves[-14:], axis=0) if len(down_moves) >= 14 else np.mean(down_moves, axis=0)
-         rsi = 100 - (100 / (1 + avg_up / (avg_down + 1e-6)))
-
-         # to ensure all arrays have the same shape
-         sma_20 = np.atleast_1d(sma_20)
-         sma_50 = np.atleast_1d(sma_50)
-         rsi = np.atleast_1d(rsi)
-
-         return np.concatenate([sma_20, sma_50, rsi])
-
-
     def _calculate_reward(self, portfolio_return, new_weights):
         lambd = 4.0
         var_penalty = lambd * (portfolio_return ** 2)

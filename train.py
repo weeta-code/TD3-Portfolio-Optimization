@@ -26,7 +26,7 @@ def get_stock_data(tickers=[get_random_sp500()],
         try:
             stock = yf.download(ticker, start=start_date, end=end_date)
             # Use 'Close' price and handle missing data
-            prices = stock['Close'].fillna(method='ffill').values
+            prices = stock['Close'].ffill().values
             data.append(prices)
             print(f"Successfully downloaded data for {ticker}")
         except Exception as e:
@@ -38,7 +38,7 @@ def get_stock_data(tickers=[get_random_sp500()],
     if np.isnan(price_data).any():
         print("Warning: NaN values found in price data")
         # Fill NaN values with forward fill
-        price_data = pd.DataFrame(price_data).fillna(method='ffill').values
+        price_data = pd.DataFrame(price_data).ffill().values
 
     return price_data
 
@@ -317,10 +317,10 @@ if __name__ == "__main__":
 
         print(f"Agent Sharpe Ratio: {sharpe_ratio:.2f}")
         # print(f"SPY Sharpe Ratio: {spy_sharpe:.2f}")
-        print(f"SPY Sharpe Ratio: {spy_sharpe.iloc[0]:.2f}")
+        print(f"SPY Sharpe Ratio: {spy_sharpe:.2f}")
         evaluate_benchmark(portfolio_returns, spy_returns)
 
-        if sharpe_ratio > spy_sharpe.iloc[0]:
+        if sharpe_ratio > spy_sharpe:
             print("Agent outperformed SPY!")
         else:
             print("SPY outperformed the agent.")
