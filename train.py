@@ -196,7 +196,7 @@ def plot_training_progress(rewards, latest_portfolio_values):
 
     plt.tight_layout()
 
-def evaluate_benchmark(agent_returns, spy_returns):
+def evaluate_benchmark(agent_returns, spy_returns, port_value):
     def sharpe(r):
         sharpe_val = ((r.mean()) / (r.std() + 1e-8)) * np.sqrt(252)
         return float(np.asarray(sharpe_val)) # Old .mean() and .std() return series which is why we got the original issue
@@ -209,12 +209,12 @@ def evaluate_benchmark(agent_returns, spy_returns):
     print(f"SPY Total Return:   {np.prod(1 + spy_returns) - 1:.2%}")
 
     plt.figure(figsize=(10, 5))
-    plt.plot(np.cumprod(1 + agent_returns), label="TD3 Agent")
+    plt.plot(np.cumprod(1 + port_value), label="Agent Portfolio(USD)")
     plt.plot(np.cumprod(1 + spy_returns), label="SPY")
     plt.legend()
     plt.title("Cumulative Returns: TD3 vs SPY")
     plt.grid(True)
-    plt.xlabel("Time Step")
+    plt.xlabel("Date")
     plt.ylabel("Portfolio Value (normalized)")
     plt.tight_layout()
     plt.savefig("benchmark_vs_spy.png")
