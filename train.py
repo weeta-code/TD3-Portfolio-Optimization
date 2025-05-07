@@ -1,23 +1,53 @@
 import os
-# Set environment variable to handle OpenMP error on macOS
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 import numpy as np
-import torch
 import matplotlib.pyplot as plt
 from market_env import MarketEnv
 from td3 import TD3Agent, Actor, Critic
 import yfinance as yf
-from datetime import datetime, timedelta
+from datetime import datetime
 import pandas as pd
 import random
 
-def get_random_sp500(n: int = 25):
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    symbols = pd.read_html(url, header=0)[0]["Symbol"].tolist()
-    return random.sample(symbols, n)
+# def get_random_sp500(n: int = 25):
+#     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+#     symbols = pd.read_html(url, header=0)[0]["Symbol"].tolist()
+#     return random.sample(symbols, n)
 
-def get_stock_data(tickers=[get_random_sp500()],
+# def get_stock_data(tickers=[get_random_sp500()],
+#                    start_date='2020-01-01',
+#                    end_date='2023-12-31'):
+#     """Download and prepare stock data for training"""
+#     data = []
+#     for ticker in tickers:
+#         try:
+#             stock = yf.download(ticker, start=start_date, end=end_date)
+#             # Use 'Close' price and handle missing data
+#             prices = stock['Close'].ffill().values
+#             data.append(prices)
+#             print(f"Successfully downloaded data for {ticker}")
+#         except Exception as e:
+#             print(f"Error downloading {ticker}: {str(e)}")
+#             return None
+
+#     # Stack the price data and check for validity
+#     price_data = np.column_stack(data)
+#     if np.isnan(price_data).any():
+#         print("Warning: NaN values found in price data")
+#         # Fill NaN values with forward fill
+#         price_data = pd.DataFrame(price_data).ffill().values
+
+#     return price_data
+
+# manually defined top 25 tickers
+top_25_stocks_2023 = [
+    "SMCI", "NVDA", "META", "PLTR", "RCL", "BLDR", "UBER", "CRWD", "CCL",
+    "PHM", "AMD", "TSLA", "PANW", "AVGO", "DASH", "GE", "CRM", "DELL", "ANET",
+    "FICO", "INTC", "LII", "JBL", "LRCX", "NOW"
+]
+
+def get_stock_data(tickers=top_25_stocks_2023,
                    start_date='2020-01-01',
                    end_date='2023-12-31'):
     """Download and prepare stock data for training"""
@@ -25,7 +55,6 @@ def get_stock_data(tickers=[get_random_sp500()],
     for ticker in tickers:
         try:
             stock = yf.download(ticker, start=start_date, end=end_date)
-            # Use 'Close' price and handle missing data
             prices = stock['Close'].ffill().values
             data.append(prices)
             print(f"Successfully downloaded data for {ticker}")
@@ -33,11 +62,9 @@ def get_stock_data(tickers=[get_random_sp500()],
             print(f"Error downloading {ticker}: {str(e)}")
             return None
 
-    # Stack the price data and check for validity
     price_data = np.column_stack(data)
     if np.isnan(price_data).any():
         print("Warning: NaN values found in price data")
-        # Fill NaN values with forward fill
         price_data = pd.DataFrame(price_data).ffill().values
 
     return price_data
@@ -201,7 +228,7 @@ if __name__ == "__main__":
     # Get training data
     print("\nDownloading stock data...")
     stock_data = get_stock_data(
-        tickers=[get_random_sp500()],
+        tickers=[top_25_stocks_2023],
         start_date='2023-01-01',  # Using just 1 year of data for testing
         end_date='2023-12-31'
     )
