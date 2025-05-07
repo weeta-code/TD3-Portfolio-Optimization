@@ -16,7 +16,7 @@ import random
 #     return random.sample(symbols, n)
 
 # def get_stock_data(tickers=[get_random_sp500()],
-#                    start_date='2020-01-01',
+#                    start_date='2023-01-01',
 #                    end_date='2023-12-31'):
 #     """Download and prepare stock data for training"""
 #     data = []
@@ -196,10 +196,10 @@ def plot_training_progress(rewards, latest_portfolio_values):
 
     plt.tight_layout()
 
-def evaluate_benchmark(agent_returns, spy_returns, port_value):
+def evaluate_benchmark(agent_returns, spy_returns, portfolio_values):
     def sharpe(r):
         sharpe_val = ((r.mean()) / (r.std() + 1e-8)) * np.sqrt(252)
-        return float(np.asarray(sharpe_val)) # Old .mean() and .std() return series which is why we got the original issue
+        return float(np.asarray(sharpe_val))
 
     print("\nBenchmarking vs SPY")
     print("-" * 40)
@@ -208,19 +208,21 @@ def evaluate_benchmark(agent_returns, spy_returns, port_value):
     print(f"Agent Total Return: {np.prod(1 + agent_returns) - 1:.2%}")
     print(f"SPY Total Return:   {np.prod(1 + spy_returns) - 1:.2%}")
 
+    initial_value = portfolio_values[0]
+    spy_values = initial_value * np.cumprod(1 + spy_returns)
+
     plt.figure(figsize=(10, 5))
-    plt.plot(np.cumprod(1 + port_value), label="Agent Portfolio(USD)")
-    plt.plot(np.cumprod(1 + spy_returns), label="SPY")
+    plt.plot(portfolio_values, label="Agent")
+    plt.plot(spy_values, label="SPY")
     plt.legend()
-    plt.title("Cumulative Returns: TD3 vs SPY")
+    plt.title("Portfolio Value: TD3 vs SPY")
     plt.grid(True)
-    plt.xlabel("Date")
-    plt.ylabel("Portfolio Value (normalized)")
+    plt.xlabel("Trading Days: 2023-01-01 to 2023-12-31")
+    plt.ylabel("Portfolio Value (USD)")
     plt.tight_layout()
     plt.savefig("benchmark_vs_spy.png")
     print("Benchmark plot saved as benchmark_vs_spy.png")
     plt.show()
-
 
 if __name__ == "__main__":
     print("\nStarting program initialization...")
@@ -229,7 +231,7 @@ if __name__ == "__main__":
     print("\nDownloading stock data...")
     stock_data = get_stock_data(
         tickers=[top_25_stocks_2023],
-        start_date='2023-01-01',  # Using just 1 year of data for testing
+        start_date='2023-01-01',
         end_date='2023-12-31'
     )
     if stock_data is None:
@@ -327,25 +329,26 @@ if __name__ == "__main__":
         # Train the agent (minimal episodes and steps for testing)
         train_agent(env, agent, n_episodes=10, max_steps=1000, eval_freq=2)
 
-        # Benchmarking: Load SPY data and calculate performance metrics
-        # spy_data = yf.download('SPY', start='2023-01-01', end='2023-12-31')
-        # spy_returns = spy_data['Close'].pct_change().dropna()
-
-        spy_data = yf.download('SPY', start='2023-01-01', end='2023-12-31')[['Close']]  # Enforce DataFrame with 1 column
-        spy_returns = spy_data['Close'].pct_change().dropna().to_numpy()  # Changed to numpy array to allow for sharpe calculation
+        spy_data = yf.download('SPY', start='2023-01-01', end='2023-12-31')[['Close']]
+        spy_returns = spy_data['Close'].pct_change().dropna().to_numpy()
 
         # Calculate portfolio returns
         portfolio_returns = np.array(env.portfolio_returns_history)
+        portfolio_values = [env.starting_cash]  # Start with initial portfolio value
+        current_value = env.starting_cash
+        for ret in portfolio_returns:
+            current_value *= (1 + ret)
+            portfolio_values.append(current_value)
+        portfolio_values = np.array(portfolio_values)
+
         sharpe_ratio = ((portfolio_returns.mean() - env.risk_free_rate) / (portfolio_returns.std() + 1e-8)) * np.sqrt(252)
 
         # Compare with SPY
         spy_sharpe = ((spy_returns.mean() - env.risk_free_rate) / (spy_returns.std() + 1e-8)) * np.sqrt(252)
 
-
         print(f"Agent Sharpe Ratio: {sharpe_ratio:.2f}")
-        # print(f"SPY Sharpe Ratio: {spy_sharpe:.2f}")
         print(f"SPY Sharpe Ratio: {spy_sharpe:.2f}")
-        evaluate_benchmark(portfolio_returns, spy_returns)
+        evaluate_benchmark(portfolio_returns, spy_returns, portfolio_values)
 
         if sharpe_ratio > spy_sharpe:
             print("Agent outperformed SPY!")
